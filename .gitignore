@@ -1,0 +1,46 @@
+
+# Python virtual environments
+venv/
+.venv/
+env/
+backend/venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Secrets and environment variables
+.env
+.env.*
+!.env.example
+
+# Node.js dependencies
+node_modules/
+frontend/node_modules/
+
+# Build output (exclude only if deployment rebuilds it)
+dist/
+build/
+frontend/dist/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.old
+*.encoding-backup
+*.container-old.py
+
+# Security scan report
+zap-report.html
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Coverage and test artifacts
+.coverage
+htmlcov/
+.pytest_cache/

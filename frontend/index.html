@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CORTEX — Autonomous SRE &amp; Company Brain (FalkorDB)</title>
+ <link rel="stylesheet" href="./dist/tailwind.css">
+  <script src="/vendor/cytoscape.min.js"></script>
+  <style>
+    body { background-color: #090d16; color: #e2e8f0; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(244, 63, 94, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+    }
+    .pulse-danger { animation: pulse-ring 2s infinite; }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden select-none">
+
+  <header class="h-11 border-b border-slate-800 bg-slate-950/95 px-4 flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-2.5">
+      <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></div>
+      <span class="font-bold tracking-wider text-base bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent">
+        CORTEX // FALKORDB NERVOUS SYSTEM
+      </span>
+      <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-cyan-300 border border-cyan-500/30 font-mono">
+        GraphBLAS + Vector v6.0
+      </span>
+    </div>
+
+    <div class="flex items-center gap-3 text-xs">
+      <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg text-[11px]">
+        <span class="text-slate-400">Tracks:</span>
+        <span class="text-emerald-400 font-semibold">01 Connected Data</span>
+        <span class="text-slate-600">•</span>
+        <span class="text-purple-400 font-semibold">02 Episodic Memory</span>
+        <span class="text-slate-600">•</span>
+        <span class="text-amber-400 font-semibold">03 Company Brain</span>
+      </div>
+      <button onclick="resetDemo()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer text-[11px]">
+        ↺ Reset P1 Outage State
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 grid grid-cols-12 overflow-hidden min-h-0">
+
+    <section class="col-span-3 border-r border-slate-800 bg-slate-900/50 p-3 flex flex-col justify-between gap-2 overflow-y-auto min-h-0">
+      
+      <div class="flex flex-col gap-2">
+        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5">
+          <label class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block mb-1">
+            FalkorDB Multigraph Tenant Isolation
+          </label>
+          <select id="tenantSelect" onchange="switchTenant()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-cyan-300 font-mono focus:outline-none focus:border-cyan-500">
+            <option value="acme_corp">tenant_acme_corp (FinTech Commerce)</option>
+            <option value="beta_health">tenant_beta_health (Healthcare EHR)</option>
+          </select>
+          <p class="text-[10px] text-slate-400 mt-1">
+            Native graph-level isolation via <code class="text-slate-200">db.select_graph()</code>
+          </p>
+        </div>
+
+        <div class="bg-rose-950/20 border border-rose-500/40 rounded-xl p-2.5">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1">
+              🚨 Active P1 Alert Detected
+            </span>
+            <span id="alertStatusBadge" class="text-[10px] font-mono bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded border border-rose-500/40">
+              ALERT-901 • OPEN
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-300 leading-snug mb-2">
+            <strong class="text-white">CheckoutService</strong> returning HTTP 502. Downstream JWT verification failing.
+          </p>
+          <button id="simulateBtn" onclick="triggerIncidentSwarm()" class="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-rose-600 to-orange-600 hover:from-rose-500 hover:to-orange-500 text-white font-semibold text-xs shadow-lg pulse-danger transition cursor-pointer">
+            ⚡ Launch 4-Agent Incident Swarm
+          </button>
+        </div>
+
+        <div class="bg-cyan-950/25 border border-cyan-500/30 rounded-xl p-2.5 text-[10.5px] space-y-1">
+          <div class="font-bold text-cyan-300 uppercase tracking-wider text-[10px]">
+            ⚖️ Why FalkorDB vs. SQL / Vector DB
+          </div>
+          <p class="text-slate-300 leading-snug">
+            • <strong class="text-white">vs. SQL:</strong> 4-hop root cause needs a 4-level <code class="text-cyan-200">WITH RECURSIVE</code> CTE &amp; 3 table JOINs vs. 1 native Cypher pattern (<strong id="q1LiveMs" class="text-emerald-300">measured live on run</strong>).
+          </p>
+          <p class="text-slate-300 leading-snug">
+            • <strong class="text-white">vs. Vector RAG:</strong> Flat embeddings see 0 service dependencies or PR ownership edges.
+          </p>
+        </div>
+
+        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 flex flex-col gap-1.5">
+          <span class="text-[10px] uppercase tracking-wider text-amber-400 font-semibold block">
+            🧠 Track 03: Company Brain &amp; Live GitHub Sync
+          </span>
+          <div class="flex flex-col gap-1.5">
+            <button onclick="askCompanyBrain('Why does CheckoutService use Redis instead of Postgres, and who owns it?')" class="text-left text-[11px] bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 rounded-lg p-1.5 text-slate-200 leading-snug transition cursor-pointer">
+              💬 "Why does CheckoutService use Redis instead of Postgres, and who owns it?"
+            </button>
+            <button onclick="askCompanyBrain('Who is the top domain expert for AuthTokenService and what is their timezone?')" class="text-left text-[11px] bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 rounded-lg p-1.5 text-slate-200 leading-snug transition cursor-pointer">
+              💬 "Who is the top domain expert for AuthTokenService and what is their timezone?"
+            </button>
+          </div>
+
+          <div class="bg-slate-900/90 border border-emerald-500/30 rounded-lg p-2 space-y-1.5 mt-0.5">
+            <div class="flex gap-1.5">
+              <input id="ghRepoInput" type="text" value="FalkorDB/FalkorDB" placeholder="owner/repo" class="flex-1 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-[11px] text-emerald-300 font-mono focus:outline-none focus:border-emerald-400" />
+              <input id="ghPrInput" type="number" placeholder="PR # (latest)" class="w-24 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-[11px] text-emerald-300 font-mono focus:outline-none focus:border-emerald-400" />
+            </div>
+            <button onclick="ingestLiveKnowledge()" class="w-full text-center text-[11px] bg-emerald-950/60 hover:bg-emerald-900/70 border border-emerald-500/50 rounded px-2 py-1.5 text-emerald-200 font-semibold transition cursor-pointer">
+              ➕ Sync Live GitHub PR + Diff into FalkorDB
+            </button>
+          </div>
+
+          <div class="flex gap-1.5 mt-0.5">
+            <input id="brainInput" type="text" placeholder="Ask about any service..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-amber-400" />
+            <button onclick="submitCustomBrainQuery()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition cursor-pointer">
+              Ask
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 grid grid-cols-3 text-center shrink-0">
+        <div>
+          <div id="statNodes" class="text-sm font-bold text-cyan-400">30</div>
+          <div class="text-[9px] text-slate-400 uppercase">Graph Nodes</div>
+        </div>
+        <div class="border-x border-slate-800">
+          <div id="statEdges" class="text-sm font-bold text-purple-400">41</div>
+          <div class="text-[9px] text-slate-400 uppercase">Graph Edges</div>
+        </div>
+        <div>
+          <div id="statLatency" class="text-sm font-bold text-emerald-400">-- ms</div>
+          <div id="statLatencySub" class="text-[9px] text-slate-400 uppercase">Avg of Run</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="col-span-4 border-r border-slate-800 bg-slate-950/60 flex flex-col overflow-hidden min-h-0">
+      <div class="px-3.5 py-2 border-b border-slate-800 flex items-center justify-between shrink-0">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-300">
+          🤖 4-Agent Coordination &amp; Cypher Telemetry
+        </span>
+        <span id="activeAgentBadge" class="text-[10.5px] font-mono text-cyan-400 bg-cyan-950/50 px-2 py-0.5 rounded border border-cyan-500/30">
+          Standby
+        </span>
+      </div>
+
+      <div class="px-3 py-1.5 bg-slate-900/80 border-b border-slate-800 grid grid-cols-4 gap-1 text-center text-[10px] font-mono shrink-0">
+        <div id="pipe-orchestrator" class="py-1 px-1 rounded bg-slate-950 border border-slate-800 text-slate-500 transition">
+          1. Orchestrator
+        </div>
+        <div id="pipe-triage" class="py-1 px-1 rounded bg-slate-950 border border-slate-800 text-slate-500 transition">
+          2. Triage &amp; PRs
+        </div>
+        <div id="pipe-memory" class="py-1 px-1 rounded bg-slate-950 border border-slate-800 text-slate-500 transition">
+          3. Memory/Brain
+        </div>
+        <div id="pipe-remediation" class="py-1 px-1 rounded bg-slate-950 border border-slate-800 text-slate-500 transition">
+          4. Remediation
+        </div>
+      </div>
+
+      <div id="agentStream" class="flex-1 p-3 overflow-y-auto space-y-2 min-h-0">
+        <div class="text-center py-12 text-slate-500 text-xs">
+          Click <strong class="text-rose-400">"Launch 4-Agent Incident Swarm"</strong> or ask a <strong class="text-amber-400">Company Brain</strong> question to watch live multi-hop FalkorDB traversals.
+        </div>
+      </div>
+    </section>
+
+    <section class="col-span-5 bg-[#060911] relative flex flex-col overflow-hidden min-h-0">
+      <div class="absolute top-2.5 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
+        <div class="flex flex-wrap gap-2 bg-slate-950/90 border border-slate-800 px-2.5 py-1 rounded-lg text-[10px] pointer-events-auto">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Healthy</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Degraded</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500"></span>Down/Alert</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span>PR/Deploy</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-cyan-400"></span>Memory/Step</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-400"></span>Owner/ADR</span>
+        </div>
+        <div class="flex gap-1.5 pointer-events-auto">
+          <button onclick="clearSpotlight()" class="bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-slate-700 px-2 py-1 rounded-lg text-[10px] cursor-pointer">
+            ✦ Show All
+          </button>
+          <button onclick="fitGraph()" class="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 px-2 py-1 rounded-lg text-[10px] cursor-pointer">
+            ⌖ Fit
+          </button>
+        </div>
+      </div>
+
+      <div class="pt-10 px-4 grid grid-cols-3 text-[9.5px] uppercase tracking-widest text-slate-400 font-mono text-center border-b border-slate-900/80 pb-1 shrink-0">
+        <div>◀ People / Teams / ADRs</div>
+        <div>▲ Tiered Services &amp; DBs ▼</div>
+        <div>PRs / Alerts / Memory ▶</div>
+      </div>
+
+      <div id="cy" class="flex-1 w-full min-h-0"></div>
+
+      <div id="nodeInspector" class="h-32 border-t border-slate-800 bg-slate-950/95 p-2.5 overflow-y-auto shrink-0">
+        <div class="flex items-center justify-between mb-0.5">
+          <span class="text-[10px] uppercase tracking-wider text-cyan-400 font-semibold">
+            🔍 Live FalkorDB Node &amp; Relationship Inspector
+          </span>
+          <span class="text-[10px] text-slate-400 font-mono">Click any node on canvas</span>
+        </div>
+        <div id="nodeInspectorContent" class="text-xs text-slate-300 font-mono"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const API_BASE = 'http://localhost:8000';
+    let cortexAdminKey =
+  sessionStorage.getItem('cortexAdminKey') || '';
+
+function getAdminHeaders() {
+  if (!cortexAdminKey) {
+    cortexAdminKey = prompt('Enter your CORTEX admin API key:') || '';
+  }
+
+  if (cortexAdminKey) {
+    sessionStorage.setItem('cortexAdminKey', cortexAdminKey);
+  }
+
+  return cortexAdminKey
+    ? { 'X-API-Key': cortexAdminKey }
+    : null;
+}
+    let cy = null;
+    let renderedMsgCount = 0;
+    let queryLatencies = [];
+    let currentGraphEdges = [];
+    let currentGraphNodes = [];
+
+    const LAYERED_POSITIONS = {
+      'Platform':        { x: 75,  y: 75 },
+      'Checkout':        { x: 75,  y: 190 },
+      'CoreInfra':       { x: 75,  y: 305 },
+      'Aarav Sharma':    { x: 220, y: 70 },
+      'Priya Nair':      { x: 220, y: 175 },
+      'Marcus Vance':    { x: 220, y: 280 },
+      'Elena Rostova':   { x: 220, y: 440 },
+      'ADR-019':         { x: 145, y: 485 },
+      'ADR-024':         { x: 255, y: 535 },
+      'SLK-772':         { x: 145, y: 585 },
+
+      'APIGateway':      { x: 420, y: 65 },
+      'WebStorefront':   { x: 640, y: 65 },
+      'CheckoutService': { x: 485, y: 195 },
+      'OrderService':    { x: 665, y: 195 },
+      'PaymentService':  { x: 405, y: 335 },
+      'InventoryService':{ x: 640, y: 335 },
+      'AuthTokenService':{ x: 495, y: 475 },
+      'FraudEngine':     { x: 675, y: 475 },
+      'PostgresPrimary': { x: 410, y: 595 },
+      'RedisCache':      { x: 635, y: 595 },
+
+      'PR-398':          { x: 870, y: 75 },
+      'PR-401':          { x: 870, y: 175 },
+      'PR-402':          { x: 870, y: 275 },
+      'PR-405':          { x: 1035, y: 115 },
+      'DEP-881':         { x: 1035, y: 215 },
+
+      'ALERT-901':       { x: 870, y: 385 },
+      'ALERT-710':       { x: 870, y: 485 },
+      'ALERT-650':       { x: 870, y: 585 },
+      'MEM-301':         { x: 1035, y: 450 },
+      'STEP-1':          { x: 1185, y: 370 },
+      'STEP-2':          { x: 1185, y: 460 },
+      'STEP-3':          { x: 1185, y: 550 },
+
+      'PatientPortal':   { x: 500, y: 100 },
+      'EHRRecordsAPI':   { x: 360, y: 260 },
+      'ImagingService':  { x: 640, y: 260 },
+      'HIPAAuditVault':  { x: 500, y: 420 }
+    };
+
+    function escapeHtml(raw) {
+      if (raw === null || raw === undefined) return '';
+      return String(raw)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatMarkdown(text) {
+      if (!text) return '';
+      const safe = escapeHtml(text);
+      return safe
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
+        .replace(/`(.*?)`/g, '<code class="px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 font-mono text-[11px]">$1</code>')
+        .replace(/\[(.*?)\]\((https?:\/\/[^\s)]+)\)/g, function(_match, label, url) {
+          return '<a target="_blank" rel="noopener noreferrer" class="text-cyan-400 underline" href="' + url + '">' + label + '</a>';
+        });
+    }
+
+    function recordQueryLatency(ms, toolName) {
+      if (!ms || isNaN(ms)) return;
+      const val = Number(ms);
+      queryLatencies.push(val);
+      const sum = queryLatencies.reduce((a, b) => a + b, 0);
+      const avg = sum / queryLatencies.length;
+      document.getElementById('statLatency').textContent = `${avg.toFixed(2)}ms`;
+      document.getElementById('statLatencySub').textContent = `Avg (${queryLatencies.length} Queries)`;
+
+      if (toolName === 'find_root_cause') {
+        const q1El = document.getElementById('q1LiveMs');
+        if (q1El) q1El.textContent = `${val.toFixed(2)}ms for 4-hop query`;
+      }
+    }
+
+    function getNodeColor(data) {
+      const cat = data.category;
+      const status = data.status;
+      if (cat === 'Microservice' || cat === 'Database') {
+        if (status === 'down') return '#f43f5e';
+        if (status === 'degraded') return '#f59e0b';
+        return '#10b981';
+      }
+      if (cat === 'PullRequest' || cat === 'DeployEvent') return '#a855f7';
+      if (cat === 'IncidentAlert') return '#ef4444';
+      if (cat === 'ResolutionMemory' || cat === 'ProcedureStep') return '#06b6d4';
+      if (cat === 'TriageResult') return '#ec4899';
+      if (cat === 'Person' || cat === 'Team') return '#3b82f6';
+      return '#eab308';
+    }
+
+    function inspectNodeByData(d) {
+      if (!d) return;
+      const propsHtml = Object.entries(d.properties || {})
+        .map(([k, v]) => `<span class="text-cyan-400">${escapeHtml(k)}:</span> <span class="text-slate-200">${escapeHtml(v)}</span>`)
+        .join(' &nbsp;•&nbsp; ');
+
+      const rels = currentGraphEdges
+        .filter(e => e.source === d.id || e.target === d.id)
+        .map(e => {
+          const otherId = e.source === d.id ? e.target : e.source;
+          const otherNode = currentGraphNodes.find(n => n.id === otherId);
+          const otherLabel = escapeHtml(otherNode ? otherNode.label : otherId);
+          const relLabel = escapeHtml(e.label);
+          return e.source === d.id
+            ? `<span class="text-emerald-400">-[:${relLabel}]-&gt;</span> <strong class="text-white">${otherLabel}</strong>`
+            : `<strong class="text-white">${otherLabel}</strong> <span class="text-purple-400">-[:${relLabel}]-&gt;</span>`;
+        });
+
+      document.getElementById('nodeInspectorContent').innerHTML = `
+        <div class="flex items-center gap-2 mb-0.5">
+          <strong class="text-white text-xs">${escapeHtml(d.label)}</strong>
+          <span class="px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 text-[10px]">:${escapeHtml(d.category)}</span>
+          ${d.status ? `<span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 text-[10px]">status: ${escapeHtml(d.status)}</span>` : ''}
+        </div>
+        <div class="text-[11px] leading-snug mb-1">${propsHtml || 'No additional properties'}</div>
+        <div class="text-[10.5px] text-slate-400 border-t border-slate-800/80 pt-1">
+          <span class="text-slate-500 uppercase">Connected Edges (${rels.length}):</span> ${rels.slice(0, 6).join(' &nbsp;|&nbsp; ') || 'None'}
+        </div>
+      `;
+    }
+
+    async function loadGraph(tenant = 'acme_corp', autoSelectLabel = 'MEM-301') {
+      const res = await fetch(`${API_BASE}/api/graph?tenant_id=${encodeURIComponent(tenant)}`);
+      if (!res.ok) return;
+      const data = await res.json();
+
+      currentGraphNodes = data.nodes || [];
+      currentGraphEdges = data.edges || [];
+
+      document.getElementById('statNodes').textContent = currentGraphNodes.length;
+      document.getElementById('statEdges').textContent = currentGraphEdges.length;
+
+      const elements = [];
+      let dynamicCounter = 0;
+
+      currentGraphNodes.forEach((n) => {
+        let pos = LAYERED_POSITIONS[n.label];
+        if (!pos) {
+          pos = {
+            x: 1035 + (dynamicCounter % 2) * 145,
+            y: 120 + Math.floor(dynamicCounter / 2) * 85
+          };
+          dynamicCounter++;
+        }
+
+        elements.push({
+          data: {
+            id: n.id,
+            label: n.label,
+            category: n.category,
+            status: n.status,
+            properties: n.properties,
+            color: getNodeColor(n)
+          },
+          position: pos
+        });
+      });
+
+      currentGraphEdges.forEach(e => {
+        elements.push({
+          data: {
+            id: e.id,
+            source: e.source,
+            target: e.target,
+            label: e.label
+          }
+        });
+      });
+
+      if (cy) cy.destroy();
+
+      cy = cytoscape({
+        container: document.getElementById('cy'),
+        elements: elements,
+        layout: { name: 'preset', padding: 30 },
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'background-color': 'data(color)',
+              'label': 'data(label)',
+              'color': '#f8fafc',
+              'font-size': '11px',
+              'font-weight': 'bold',
+              'text-valign': 'bottom',
+              'text-margin-y': 5,
+              'text-background-color': '#060911',
+              'text-background-opacity': 0.88,
+              'text-background-padding': '2px',
+              'width': 26,
+              'height': 26,
+              'border-width': 2,
+              'border-color': '#1e293b',
+              'transition-property': 'opacity, border-width, border-color, width, height, font-size',
+              'transition-duration': '0.25s'
+            }
+          },
+          {
+            selector: 'edge',
+            style: {
+              'width': 1.6,
+              'line-color': '#334155',
+              'target-arrow-color': '#475569',
+              'target-arrow-shape': 'triangle',
+              'curve-style': 'bezier',
+              'label': '',
+              'font-size': '10px',
+              'font-weight': 'bold',
+              'color': '#fde047',
+              'text-background-color': '#090d16',
+              'text-background-opacity': 0.92,
+              'text-background-padding': '3px',
+              'text-rotation': 'none',
+              'transition-property': 'opacity, line-color, width',
+              'transition-duration': '0.25s'
+            }
+          },
+          {
+            selector: 'edge.highlighted, edge:selected, edge.hovered',
+            style: {
+              'label': 'data(label)',
+              'font-size': '11px',
+              'font-weight': 'bold',
+              'color': '#fde047',
+              'text-margin-y': -10,
+              'width': 3.2,
+              'line-color': '#22d3ee',
+              'target-arrow-color': '#22d3ee',
+              'opacity': 1,
+              'z-index': 999
+            }
+          },
+          {
+            selector: 'node.dimmed',
+            style: {
+              'opacity': 0.45
+            }
+          },
+          {
+            selector: 'edge.dimmed',
+            style: {
+              'opacity': 0.32
+            }
+          },
+          {
+            selector: 'node.highlighted',
+            style: {
+              'opacity': 1,
+              'font-size': '13.5px',
+              'text-margin-y': 6,
+              'border-width': 5,
+              'border-color': '#22d3ee',
+              'width': 38,
+              'height': 38,
+              'z-index': 999
+            }
+          }
+        ]
+      });
+
+      cy.fit(null, 30);
+
+      cy.on('tap', 'node', function(evt) {
+        inspectNodeByData(evt.target.data());
+      });
+      cy.on('mouseover', 'edge', e => e.target.addClass('hovered'));
+      cy.on('mouseout', 'edge', e => e.target.removeClass('hovered'));
+
+      const defaultNode = cy.nodes().filter(n => n.data('label') === autoSelectLabel)[0] || cy.nodes()[0];
+      if (defaultNode) {
+        inspectNodeByData(defaultNode.data());
+      }
+    }
+
+    function fitGraph() {
+      if (cy) cy.fit(null, 30);
+    }
+
+    function clearSpotlight() {
+      if (!cy) return;
+      cy.elements().removeClass('dimmed highlighted');
+    }
+
+    function spotlightTraversal(labelsList) {
+      if (!cy || !labelsList || !labelsList.length) return;
+      const cleanLabels = labelsList.filter(Boolean);
+
+      cy.elements().removeClass('highlighted').addClass('dimmed');
+
+      const matchedNodes = cy.nodes().filter(n => cleanLabels.includes(n.data('label')));
+
+      matchedNodes.forEach((node, idx) => {
+        setTimeout(() => {
+          node.removeClass('dimmed').addClass('highlighted');
+          inspectNodeByData(node.data());
+        }, idx * 100);
+      });
+
+      setTimeout(() => {
+        const matchedIds = new Set(matchedNodes.map(n => n.id()));
+        cy.edges().forEach(edge => {
+          if (matchedIds.has(edge.source().id()) && matchedIds.has(edge.target().id())) {
+            edge.removeClass('dimmed').addClass('highlighted');
+          }
+        });
+      }, 160);
+    }
+
+    function resetPipelineBar() {
+      ['orchestrator', 'triage', 'memory', 'remediation'].forEach((id) => {
+        const el = document.getElementById(`pipe-${id}`);
+        if (el) {
+          el.className = 'py-1 px-1 rounded bg-slate-950 border border-slate-800 text-slate-500 transition';
+        }
+      });
+    }
+
+    function highlightPipelineStep(stepName) {
+      const order = ['orchestrator', 'triage', 'memory', 'remediation'];
+      const currentIdx = stepName === 'complete' ? 4 : order.indexOf(stepName);
+
+      order.forEach((id, idx) => {
+        const el = document.getElementById(`pipe-${id}`);
+        if (!el) return;
+        if (idx < currentIdx) {
+          el.className = 'py-1 px-1 rounded bg-emerald-950/70 border border-emerald-500/50 text-emerald-300 font-bold transition';
+        } else if (idx === currentIdx) {
+          el.className = 'py-1 px-1 rounded bg-cyan-950 border border-cyan-400 text-cyan-200 font-bold shadow transition';
+        }
+      });
+    }
+
+    function switchTenant() {
+      const tenant = document.getElementById('tenantSelect').value;
+      loadGraph(tenant);
+    }
+
+    
+async function resetDemo() {
+  const adminKey = window.prompt('Enter your CORTEX admin API key:');
+
+  if (!adminKey || !adminKey.trim()) return;
+
+  const badge = document.getElementById('activeAgentBadge');
+  badge.textContent = 'Resetting demo graph...';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/reset`, {
+      method: 'POST',
+      headers: { 'X-API-Key': adminKey.trim() }
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      badge.textContent = `Reset rejected (${res.status})`;
+      alert(`Reset failed (${res.status}): ${data.detail || 'Request rejected'}`);
+      return;
+    }
+
+    queryLatencies = [];
+    resetPipelineBar();
+    document.getElementById('statLatency').textContent = '-- ms';
+    document.getElementById('statLatencySub').textContent = 'Avg of Run';
+    document.getElementById('q1LiveMs').textContent = 'Measured live on run';
+    document.getElementById('activeAgentBadge').textContent = 'Standby';
+
+    document.getElementById('alertStatusBadge').className =
+      'text-[10px] font-mono bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded border border-rose-500/40';
+    document.getElementById('alertStatusBadge').textContent = 'ALERT-901 OPEN';
+
+    document.getElementById('agentStream').textContent =
+      'Demo graph reset successfully. Ready to simulate P1 outage.';
+
+    await loadGraph(document.getElementById('tenantSelect').value, 'MEM-301');
+
+    alert('Demo graph reset successfully.');
+  } catch (err) {
+    badge.textContent = 'Reset failed';
+    alert(`Could not reach backend: ${err.message}`);
+  }
+}
+
+
+    function renderTelemetryCards(telemetryList) {
+      if (!telemetryList || !telemetryList.length) return '';
+      return telemetryList.map((t, idx) => {
+        if (t.latency_ms) recordQueryLatency(t.latency_ms, t.tool);
+        const sLabel = escapeHtml(t.summary_label || 'Graph Entities');
+        const sValue = escapeHtml(t.summary_value || (t.nodes_touched || []).join(' • '));
+        const whyGraph = escapeHtml(t.why_graph || '');
+        const cypherText = escapeHtml(t.cypher_executed || '');
+        const toolName = escapeHtml(t.tool || '');
+        const latencyMs = escapeHtml(t.latency_ms || '');
+        return `
+          <details ${idx === 0 ? 'open' : ''} class="mt-1.5 bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs">
+            <summary class="cursor-pointer font-mono text-[11px] text-cyan-400 flex items-center justify-between">
+              <span>▼ ⚡ Cypher Inspector: ${toolName}()</span>
+              <span class="bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">${latencyMs} ms</span>
+            </summary>
+            <pre class="mt-1.5 p-2 bg-black/60 rounded text-[10px] text-emerald-300 overflow-x-auto font-mono">${cypherText}</pre>
+            <div class="mt-1 text-[10px] text-slate-300 font-mono">
+              <strong class="text-amber-300">${sLabel}:</strong> <span class="text-cyan-200">${sValue}</span>
+            </div>
+            ${whyGraph ? `<div class="mt-1 text-[10px] text-slate-400 italic border-t border-slate-900 pt-1">⚖️ Without Graph: ${whyGraph}</div>` : ''}
+          </details>
+        `;
+      }).join('');
+    }
+
+    function appendStepCard(state, stepName) {
+      const stream = document.getElementById('agentStream');
+      if (renderedMsgCount === 0) stream.innerHTML = '';
+
+      if (stepName === 'error') {
+        const errCard = document.createElement('div');
+        errCard.className = 'p-3 rounded-xl bg-rose-950/70 border border-rose-500/50 text-xs text-rose-200';
+        errCard.textContent = state?.final_answer || '⚠️ Service temporarily unavailable.';
+        stream.appendChild(errCard);
+        document.getElementById('activeAgentBadge').textContent = 'Rejected / Fallback';
+        return;
+      }
+
+      highlightPipelineStep(stepName);
+      document.getElementById('activeAgentBadge').textContent = state.current_agent || stepName;
+
+      const newMsgs = state.messages.slice(renderedMsgCount);
+      renderedMsgCount = state.messages.length;
+
+      let telemetryHtml = '';
+      let touched = [];
+      let handoffLabel = '';
+
+      if (stepName === 'triage' && state.triage_data?.tool_telemetry) {
+        telemetryHtml = renderTelemetryCards(state.triage_data.tool_telemetry);
+        state.triage_data.tool_telemetry.forEach(t => touched.push(...(t.nodes_touched || [])));
+        handoffLabel = '🔗 GRAPH HANDOFF: Wrote (:TriageResult) node ➔ Memory Agent';
+      } else if (stepName === 'memory') {
+        const tList = state.memory_data?.tool_telemetry || state.provenance_data?.tool_telemetry || [];
+        telemetryHtml = renderTelemetryCards(tList);
+        tList.forEach(t => touched.push(...(t.nodes_touched || [])));
+        handoffLabel = state.mode === 'incident'
+          ? '🔗 GRAPH HANDOFF: Recalled (:ResolutionMemory) ➔ Remediation Agent'
+          : '🔗 GRAPH HANDOFF: Provenance & Experts Verified ➔ Synthesis Agent';
+      } else if (stepName === 'remediation' && state.remediation_data?.tool_telemetry) {
+        telemetryHtml = renderTelemetryCards(state.remediation_data.tool_telemetry);
+        state.remediation_data.tool_telemetry.forEach(t => touched.push(...(t.nodes_touched || [])));
+      }
+
+      if (touched.length > 0) spotlightTraversal(touched);
+
+      if (newMsgs.length > 0) {
+        const agentName = escapeHtml(newMsgs[0].agent);
+        const bodyLines = newMsgs.map(m => `
+          <div class="flex items-start gap-2">
+            <span class="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded shrink-0 mt-0.5 ${m.role === 'action' ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/30' : 'bg-slate-800 text-slate-400'}">${escapeHtml(m.role)}</span>
+            <p class="text-slate-200 leading-snug">${formatMarkdown(m.content)}</p>
+          </div>
+        `).join('');
+
+        const card = document.createElement('div');
+        card.className = 'p-2.5 rounded-xl border bg-slate-900/85 border-slate-800 text-xs space-y-1.5';
+        card.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-1">
+            <span class="font-bold text-cyan-300">${agentName}</span>
+            <span class="text-[10px] font-mono text-slate-500">FalkorDB Active</span>
+          </div>
+          <div class="space-y-1">${bodyLines}</div>
+          ${telemetryHtml}
+        `;
+        stream.appendChild(card);
+
+        if (handoffLabel) {
+          const divider = document.createElement('div');
+          divider.className = 'text-center py-0.5 text-[10px] font-mono text-purple-300 bg-purple-950/30 border border-purple-500/30 rounded-lg';
+          divider.textContent = handoffLabel;
+          stream.appendChild(divider);
+        }
+      }
+
+      if (stepName === 'complete' && state.final_answer) {
+        const qCount = queryLatencies.length || 1;
+        const exactSumMs = queryLatencies.reduce((a, b) => a + b, 0).toFixed(2);
+        const exactAvgMs = (Number(exactSumMs) / qCount).toFixed(2);
+        const elapsedSec = escapeHtml(state.remediation_data?.elapsed_seconds || '0.02');
+
+        const finalCard = document.createElement('div');
+        finalCard.className = 'p-3 rounded-xl bg-gradient-to-br from-emerald-950/80 to-cyan-950/50 border-2 border-emerald-500/60 text-xs space-y-1.5 shadow-lg';
+        finalCard.innerHTML = `
+          <div class="font-bold text-emerald-300 text-[11px] flex items-center justify-between border-b border-emerald-500/30 pb-1">
+            <span>✅ COMPLETE IN ${elapsedSec}s WALL TIME</span>
+            <span class="text-[10px] font-mono bg-emerald-500/20 px-2 py-0.5 rounded text-emerald-200">
+              ${qCount} QUERIES = ${exactSumMs}ms TOTAL (${exactAvgMs}ms AVG)
+            </span>
+          </div>
+          <div class="text-slate-100 whitespace-pre-line leading-snug text-[11.5px]">${formatMarkdown(state.final_answer)}</div>
+        `;
+        stream.appendChild(finalCard);
+        document.getElementById('activeAgentBadge').textContent = `DB: ${exactSumMs}ms / Wall: ${elapsedSec}s`;
+
+        const highlightTargets = state.highlight_nodes || [];
+
+        if (state.mode === 'incident') {
+          document.getElementById('alertStatusBadge').className = 'text-[10px] font-mono bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-500/40';
+          document.getElementById('alertStatusBadge').textContent = `ALERT-901 • HEALED (${elapsedSec}s)`;
+          loadGraph(document.getElementById('tenantSelect').value, 'PR-402').then(() => {
+            spotlightTraversal(highlightTargets.length ? highlightTargets : ['ALERT-901', 'CheckoutService', 'PaymentService', 'AuthTokenService', 'PR-402', 'MEM-301', 'Priya Nair']);
+          });
+        } else {
+          if (highlightTargets.length) {
+            spotlightTraversal(highlightTargets);
+          }
+        }
+      }
+
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    async function consumeSSE(url, payload) {
+      renderedMsgCount = 0;
+      queryLatencies = [];
+      resetPipelineBar();
+      document.getElementById('agentStream').innerHTML = '';
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({ detail: 'Request rejected' }));
+        appendStepCard({ final_answer: `⚠️ Request Blocked (${response.status}): ${errData.detail || ''}` }, 'error');
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop();
+        for (const part of parts) {
+          if (part.startsWith('data: ')) {
+            const payloadObj = JSON.parse(part.slice(6));
+            appendStepCard(payloadObj.state, payloadObj.step);
+          }
+        }
+      }
+    }
+
+    function triggerIncidentSwarm() {
+      const tenant = document.getElementById('tenantSelect').value;
+      consumeSSE(`${API_BASE}/api/incident/trigger`, { alert_id: 'ALERT-901', tenant_id: tenant });
+    }
+
+    function askCompanyBrain(question) {
+      const tenant = document.getElementById('tenantSelect').value;
+      consumeSSE(`${API_BASE}/api/chat`, { query: question, tenant_id: tenant });
+    }
+
+    function submitCustomBrainQuery() {
+      const input = document.getElementById('brainInput');
+      if (!input.value.trim()) return;
+      askCompanyBrain(input.value.trim());
+      input.value = '';
+    }
+
+    async function ingestLiveKnowledge() {
+      const tenant = document.getElementById('tenantSelect').value;
+      const repoInput = (document.getElementById('ghRepoInput').value || 'FalkorDB/FalkorDB').trim();
+      const prRaw = document.getElementById('ghPrInput').value.trim();
+      const payload = {
+        tenant_id: tenant,
+        service_name: 'PaymentService',
+        github_repo: repoInput
+      };
+      if (prRaw !== '') {
+        payload.pr_number = parseInt(prRaw, 10);
+      }
+
+      
+document.getElementById('activeAgentBadge').textContent = 'Syncing GitHub...';
+
+// Ask for the admin key only when an authorized user starts ingestion.
+
+
+
+const adminHeaders = getAdminHeaders();
+
+if (!adminHeaders) {
+  document.getElementById('activeAgentBadge').textContent =
+    'Authentication cancelled';
+  return;
+}
+
+const res = await fetch(`${API_BASE}/api/knowledge/ingest`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    ...adminHeaders
+  },
+  body: JSON.stringify(payload)
+});
+
+
+      const data = await res.json().catch(() => ({ detail: 'Ingestion error' }));
+      if (!res.ok) {
+        renderedMsgCount = 0;
+        appendStepCard({ final_answer: `⚠️ GitHub Ingestion Rejected (${res.status}): ${data.detail || ''}` }, 'error');
+        return;
+      }
+
+      await loadGraph(tenant, data.pr_id || 'PaymentService');
+      spotlightTraversal(data.new_nodes || [data.pr_id, data.adr_id, 'PaymentService']);
+
+      const stream = document.getElementById('agentStream');
+      const syncCard = document.createElement('div');
+      syncCard.className = 'p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/50 text-xs space-y-1';
+      syncCard.innerHTML = `
+        <div class="font-bold text-emerald-300 flex items-center justify-between">
+          <span>🔄 LIVE GITHUB INGESTION (${escapeHtml(data.ingestion_source)})</span>
+          <span class="text-[10px] font-mono bg-slate-900 px-1.5 py-0.5 rounded text-cyan-300">${escapeHtml(data.adr_status)}</span>
+        </div>
+        <div class="text-slate-200"><strong>${escapeHtml(data.pr_id)}:</strong> ${escapeHtml(data.title)}</div>
+        <div class="text-[10.5px] text-slate-300 font-mono">Author: ${escapeHtml(data.author)} • Merged/Updated: ${escapeHtml(data.merged_at_iso)}</div>
+        <div class="text-[10.5px] text-cyan-200 font-mono">${escapeHtml(data.diff_summary)}</div>
+      `;
+      stream.prepend(syncCard);
+      document.getElementById('activeAgentBadge').textContent = `Synced ${data.pr_id}`;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => loadGraph('acme_corp', 'MEM-301'));
+  </script>
+</body>
+</html>

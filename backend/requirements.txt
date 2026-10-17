@@ -1,0 +1,12 @@
+
+falkordb>=1.0.8
+fastapi>=0.115.0
+uvicorn>=0.30.0
+pydantic>=2.8.0
+python-dotenv>=1.0.1
+langchain>=0.3.0
+langgraph>=0.2.30
+langchain-google-genai>=2.0.0
+google-genai>=0.3.0
+mcp>=1.1.0
+pytest>=8.0.0

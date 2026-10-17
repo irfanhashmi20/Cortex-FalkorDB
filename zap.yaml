@@ -1,0 +1,39 @@
+
+env:
+  contexts:
+    - name: baseline
+      urls:
+        - http://host.docker.internal:8000
+      excludePaths: []
+  parameters:
+    failOnError: true
+    progressToStdout: true
+
+jobs:
+  - type: passiveScan-config
+    parameters:
+      enableTags: false
+      maxAlertsPerRule: 10
+
+  - type: spider
+    parameters:
+      maxDuration: 1
+      url: http://host.docker.internal:8000
+
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 0
+
+  - type: outputSummary
+    parameters:
+      format: Long
+      summaryFile: /home/zap/zap_out.json
+    rules: []
+
+  - type: report
+    parameters:
+      reportDescription: "CORTEX backend baseline security scan"
+      reportDir: /zap/wrk/
+      reportFile: zap-report.html
+      reportTitle: CORTEX ZAP Baseline Scan
+      template: traditional-html
