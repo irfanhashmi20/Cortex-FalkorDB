@@ -2,8 +2,8 @@
 
 > **Built for Graph Hacks: Context for AI Agents (FalkorDB & WeMakeDevs)**  
 > **Tracks Entered:** Track 01 (Agents That Act on Connected Data) • Track 02 (Agent Memory & Coordination) • Track 03 (Company Brain)  
-> 🎥 **3-Minute Demo Video:** `[PASTE_YOUR_YOUTUBE_OR_LOOM_LINK_HERE]`  
-> 📝 **Technical Blog Post:** `[PASTE_YOUR_DEVTO_OR_HASHNODE_LINK_HERE]`  
+> 🎥 **Demo Video:** [Watch CORTEX on YouTube](https://www.youtube.com/watch?v=EXLxdIkRixQ)  
+> 📝 **Technical Blog Post:** [Read the Hashnode article](https://team-graphite.hashnode.dev/why-vector-rag-fails-at-2-am-building-an-autonomous-4-agent-sre-swarm-company-brain-on-falkordb)   
 > 📄 **License:** MIT
 
 ---
@@ -298,28 +298,52 @@ CORTEX was audited with **OWASP ZAP 2.17.0** and hardened across all HTTP and da
 
 ```text
 cortex/
-├── docker-compose.yml       # One-command FalkorDB + CORTEX container stack
-├── render.yaml              # Optional cloud deployment blueprint
-├── .env.example             # Environment variable template
-├── LICENSE                  # MIT License
-├── README.md                # Architecture, schema, Cypher & benchmark docs
+├── assets/                              # Project assets
 ├── backend/
-│   ├── Dockerfile           # Python 3.11 slim image definition
-│   ├── requirements.txt     # Python dependencies (falkordb, fastapi, langgraph, mcp, pytest)
-│   ├── main.py              # FastAPI REST + SSE streaming & GitHub ingestion endpoints
-│   ├── agent_swarm.py       # 4-agent LangGraph StateGraph & context-isolated runner
-│   ├── graph_tools.py       # 10 parameterized FalkorDB Cypher tools + connection pool
-│   ├── queries.py           # All 10 OpenCypher queries + handoff/session queries
-│   ├── seed_graph.py        # Multi-tenant graph seeder (acme_corp & beta_health)
-│   ├── embeddings.py        # 768-dim Gemini embedding client + deterministic cluster fallback
-│   ├── mcp_server.py        # FastMCP server exposing all 10 FalkorDB tools
-│   ├── benchmark.py         # Audited 10-query + 6-mode interleaved E2E benchmark suite
-│   └── test_queries.py      # 18 automated pytest unit, concurrency & invariant tests
-└── frontend/
-    └── index.html           # 3-panel SRE Command Center (Cytoscape.js + Cypher Inspector)
-```
+│   ├── __pycache__/                     # Python cache (local)
+│   ├── venv/                             # Python virtual environment (local)
+│   ├── Dockerfile                       # Backend Docker configuration
+│   ├── requirements.txt                 # Python dependencies
+│   ├── main.py                          # FastAPI application and API endpoints
+│   ├── main.container-old.py            # Previous container backend version
+│   ├── main.py.bak                       # Backend backup
+│   ├── agent_swarm.py                   # Four-agent LangGraph workflow
+│   ├── graph_tools.py                   # FalkorDB graph tools and connection pool
+│   ├── queries.py                       # Cypher queries and graph operations
+│   ├── seed_graph.py                    # Multi-tenant graph initialization
+│   ├── embeddings.py                    # Embedding generation and fallback logic
+│   ├── mcp_server.py                    # FastMCP server and graph tools
+│   ├── benchmark.py                     # Performance benchmark suite
+│   ├── test_queries.py                  # Graph query tests
+│   ├── test_api_security.py             # API security tests
+│   ├── test_ingestion_fallback.py       # Ingestion fallback tests
+│   ├── test_security.py                 # Security validation tests
+│   ├── test_tenant_api.py               # Tenant API tests
+│   └── test_tenant_isolation_integration.py
+│                                         # Tenant isolation integration tests
+├── frontend/
+│   ├── dist/                             # Production build output
+│   ├── node_modules/                     # Installed npm dependencies
+│   ├── src/                              # Frontend source code
+│   ├── vendor/                           # Vendor libraries and assets
+│   ├── index.html                        # SRE Command Center dashboard
+│   ├── index.html.20261016-210521.bak   # Timestamped HTML backup
+│   ├── index.html.bak                    # HTML backup
+│   ├── index.html.encoding-backup        # Encoding backup
+│   ├── index.html.pre-final-fix.bak      # Previous HTML version
+│   ├── favicon.svg                       # Application favicon
+│   ├── package.json                      # npm configuration and scripts
+│   ├── package-lock.json                 # Locked npm dependencies
+│   ├── repair_encoding.py                # Encoding repair utility
+│   └── tailwind.config.js                # Tailwind CSS configuration
+├── .env.example                          # Environment variable template
+├── .gitignore                             # Git ignore rules
+├── docker-compose.yml                    # Docker service orchestration
+├── LICENSE                                # MIT License
+├── README.md                              # Project documentation
+├── render.yaml                            # Render deployment configuration
+├── zap.yaml                               # OWASP ZAP security scan config
 
----
 
 ## 🚀 Quickstart (One-Command Setup)
 
